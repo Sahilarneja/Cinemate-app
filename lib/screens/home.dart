@@ -1,3 +1,4 @@
+import 'package:cinemate_app/screens/details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cinemate_app/api/api.dart';
@@ -149,115 +150,120 @@ drawer: Drawer(
     );
   }
 
-  Widget buildMovieCategory(String category, Future<List<Movie>> movies, bool autoPlay) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            category,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+Widget buildMovieCategory(String category, Future<List<Movie>> movies, bool autoPlay) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          category,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        FutureBuilder(
-          future: movies,
-          builder: (context, AsyncSnapshot<List<Movie>> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(
-                  color: Colors.white, // Adjust the color
-                ),
-              );
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text(
-                  'Error: ${snapshot.error}',
-                  style: TextStyle(color: Colors.white),
-                ),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(
-                child: Text(
-                  'No $category movies available',
-                  style: TextStyle(color: Colors.white),
-                ),
-              );
-            } else {
-              final movies = snapshot.data!;
-              return CarouselSlider.builder(
-                itemCount: movies.length,
-                itemBuilder: (context, index, movieIndex) {
-                  final movie = movies[index];
-                  return GestureDetector(
-                    onTap: () {
-                      // Navigate to movie details screen
-                      // Implement your navigation logic here
-                    },
-                    child: Container(
-                      margin: EdgeInsets.symmetric(horizontal: 8.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
+      ),
+      FutureBuilder(
+        future: movies,
+        builder: (context, AsyncSnapshot<List<Movie>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: Colors.white, // Adjust the color
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Text(
+                'No $category movies available',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          } else {
+            final movies = snapshot.data!;
+            return CarouselSlider.builder(
+              itemCount: movies.length,
+              itemBuilder: (context, index, movieIndex) {
+                final movie = movies[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailsScreen(movie: movie),
                       ),
-                      child: Stack(
-                        alignment: Alignment.bottomLeft,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              movie.posterPath,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withOpacity(0.7),
-                                ],
-                              ),
-                            ),
-                            child: Text(
-                              movie.title,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    );
+                  },
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 8.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                  );
-                },
-                options: CarouselOptions(
-                  autoPlay: autoPlay,
-                  enlargeCenterPage: true,
-                  aspectRatio: 16 / 9,
-                  autoPlayInterval: Duration(seconds: 3),
-                  viewportFraction: 0.8,
-                  initialPage: 0,
-                  enableInfiniteScroll: false, // Disable infinite scrolling
-                  pauseAutoPlayOnTouch: true, // Stop auto-scroll on touch
-                ),
-              );
-            }
-          },
-        ),
-      ],
-    );
-  }
+                    child: Stack(
+                      alignment: Alignment.bottomLeft,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            movie.posterPath,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                          child: Text(
+                            movie.title,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              options: CarouselOptions(
+                autoPlay: autoPlay,
+                enlargeCenterPage: true,
+                aspectRatio: 16 / 9,
+                autoPlayInterval: Duration(seconds: 3),
+                viewportFraction: 0.8,
+                initialPage: 0,
+                enableInfiniteScroll: false, // Disable infinite scrolling
+                pauseAutoPlayOnTouch: true, // Stop auto-scroll on touch
+              ),
+            );
+          }
+        },
+      ),
+    ],
+  );
+}
+
 Widget buildMovieGrid(String category, Future<List<Movie>> movies) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
@@ -312,8 +318,12 @@ Widget buildMovieGrid(String category, Future<List<Movie>> movies) {
                 final movie = movies[index];
                 return GestureDetector(
                   onTap: () {
-                    // Navigate to movie details screen
-                    // Implement your navigation logic here
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailsScreen(movie: movie),
+                      ),
+                    );
                   },
                   child: Container(
                     decoration: BoxDecoration(
