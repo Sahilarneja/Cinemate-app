@@ -60,86 +60,96 @@ class _HomeState extends State<Home> {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 255, 0, 0),
+drawer: Drawer(
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: <Widget>[
+      Container(
+        color: Colors.red, // Background color for the Drawer header container containing John Doe's information
+        child: DrawerHeader(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundImage: AssetImage('assets/images/avatar.jpeg'),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage('assets/images/avatar.jpeg'),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'John Doe',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Text(
-                    'johndoe@example.com',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
+              SizedBox(height: 8),
+              Text(
+                'John Doe',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            ListTile(
-              leading: Icon(Icons.settings, color: Colors.black),
-              title: Text('Settings'),
-              onTap: () {
-                // Handle settings tap
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.person, color: Colors.black),
-              title: Text('Profile'),
-              onTap: () {
-                // Handle profile tap
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.subscriptions, color: Colors.black),
-              title: Text('Subscription'),
-              onTap: () {
-                // Handle subscription tap
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.logout, color: Colors.black),
-              title: Text('Logout'),
-              onTap: () {
-                // Handle logout tap
-              },
-            ),
-          ],
+              Text(
+                'johndoe@example.com',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+      Expanded(
+        child: Container(
+          color: Colors.black, // Background color under the list
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              ListTile(
+                leading: Icon(Icons.settings, color: Colors.white),
+                title: Text('Settings', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  // Handle settings tap
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.person, color: Colors.white),
+                title: Text('Profile', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  // Handle profile tap
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.subscriptions, color: Colors.white),
+                title: Text('Subscription', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  // Handle subscription tap
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.logout, color: Colors.white),
+                title: Text('Logout', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  // Handle logout tap
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  ),
+),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildMovieCategory("Upcoming", upcomingMovies),
-            buildMovieCategory("Popular", popularMovies),
-            buildMovieCategory("Top Rated", topRatedMovies),
+            buildMovieCategory("Upcoming", upcomingMovies, true),
+            buildMovieGrid("Popular", popularMovies),
+            buildMovieGrid("Top Rated", topRatedMovies),
           ],
         ),
       ),
     );
   }
 
-  Widget buildMovieCategory(String category, Future<List<Movie>> movies) {
+  Widget buildMovieCategory(String category, Future<List<Movie>> movies, bool autoPlay) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -232,7 +242,7 @@ class _HomeState extends State<Home> {
                   );
                 },
                 options: CarouselOptions(
-                  autoPlay: true,
+                  autoPlay: autoPlay,
                   enlargeCenterPage: true,
                   aspectRatio: 16 / 9,
                   autoPlayInterval: Duration(seconds: 3),
@@ -248,4 +258,102 @@ class _HomeState extends State<Home> {
       ],
     );
   }
+Widget buildMovieGrid(String category, Future<List<Movie>> movies) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Text(
+          category,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      FutureBuilder(
+        future: movies,
+        builder: (context, AsyncSnapshot<List<Movie>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(
+                color: Colors.white, // Adjust the color
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error: ${snapshot.error}',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(
+              child: Text(
+                'No $category movies available',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          } else {
+            final movies = snapshot.data!;
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 2 / 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: movies.length,
+              itemBuilder: (context, index) {
+                final movie = movies[index];
+                return GestureDetector(
+                  onTap: () {
+                    // Navigate to movie details screen
+                    // Implement your navigation logic here
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: NetworkImage(movie.posterPath),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
+                          ),
+                        ),
+                        child: Text(
+                          movie.title,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
+        },
+      ),
+    ],
+  );
+}
 }
